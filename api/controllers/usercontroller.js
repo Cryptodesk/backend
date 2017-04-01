@@ -1,29 +1,59 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 
-exports.create_user = (req, res) => {
-    let user = new User(req.body);
-    user.save((err, user) => {
+exports.get_static_user = (req, res) => {
+    User.findOne((err, user) => {
         if(err) res.send(err);
-        else res.json(user);
+        else res.json(user._id);
     });
 };
 
-exports.get_user = (req, res) => {
-
+exports.list_user_balance = (req, res) => {
+    User.findById(req.params.userId, (err, user) => {
+        if(err) res.send(err);
+        else if(!user) res.send(new Error('User with id '+req.params.userId+' does not exists.'))
+        else res.json(user.balances);
+    });
 };
 
-exports.list_users = (req, res) => {
-    User.find({}, (err, users) => {
+exports.list_user_movements = (req, res) => {
+    User.findById(req.params.userId, (err, user) => {
         if(err) res.send(err);
-        else res.json(users);
+        else if(!user) res.send(new Error('User with id '+req.params.userId+' does not exists.'))
+        else res.json(user.movements);
     });
 };
 
 exports.add_balance = (req, res) => {
+    User.update({_id: req.params.userId},
+                {$push: {balances: req.body}}, (err, raw) => {
+                    if(err) res.send(err);
+                    else res.send(raw);
+                });
+};
 
+exports.remove_balance = (req, res) => {
+    User.update({_id: req.params.userId},
+                {$pull: {balances: req.body}}, (err, raw) => {
+                    if(err) res.send(err);
+                    else res.send(raw);
+                });
 };
 
 exports.create_movement = (req, res) => {
-
+    // first update updates to + adds the movement and the second one updates from
+    User.update({_id: req.params.userId,
+                 'balances.currency': req.body.to},
+                {$push: {movements: req.body},
+                 $inc: {'balances.$.amount': req.body.amount_to}}, (err, raw) => {
+                    if(err) res.send(err);
+                    else {
+                        User.update({_id: req.params.userId,
+                                     'balances.currency': req.body.from},
+                                    {$inc: {'balances.$.amount': -req.body.amount_from}}, (err, raw) => {
+                                        if(err) res.send(err);
+                                        else res.send(raw);
+                                    });
+                    }
+                });
 };
