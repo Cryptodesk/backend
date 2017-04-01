@@ -2,9 +2,10 @@
   "name": "cryptodeskbackend",
   "version": "1.0.0",
   "description": "The backend for the cryptodesk product.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,13 @@
   "bugs": {
     "url": "https://github.com/Cryptodesk/backend/issues"
   },
-  "homepage": "https://github.com/Cryptodesk/backend#readme"
+  "homepage": "https://github.com/Cryptodesk/backend#readme",
+  "dependencies": {
+    "autobahn": "^0.9.4",
+    "express": "^4.15.2",
+    "mongoose": "^4.9.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
 }
