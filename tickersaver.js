@@ -1,5 +1,6 @@
 const autobahn = require('autobahn');
-const Tick = require('./models/tick');
+const mongoose = require('mongoose');
+const Tick = mongoose.model('Tick');
 
 let poloniexconnection = new autobahn.Connection({
     url: 'wss://api.poloniex.com',

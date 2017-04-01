@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 let Schema = mongoose.Schema;
 
-
 let TickSchema = new Schema({
     currencyPair: String,
     last: Number,
@@ -20,4 +19,4 @@ let TickSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('Ticks', TickSchema);
+module.exports = mongoose.model('Tick', TickSchema);

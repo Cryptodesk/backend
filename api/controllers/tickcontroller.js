@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Tick = require('../../models/tick');
+const Tick = mongoose.model('Tick');
 
 exports.list_all_ticks = (req, res) => {
     Tick.find({}, (err, ticks) => {

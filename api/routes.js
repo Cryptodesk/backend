@@ -1,6 +1,7 @@
-const tickcontroller = require('./controllers/tickcontroller');
+const tickroutes = require('./routes/tickroutes');
+const userroutes = require('./routes/userroutes');
 
 module.exports = function(app){
-    app.route('/ticks')
-        .get(tickcontroller.list_all_ticks);
+    tickroutes(app);
+    userroutes(app);
 };
