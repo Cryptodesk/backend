@@ -2,6 +2,8 @@
 const mongoose = require('mongoose');
 require('./models/user');
 const User = mongoose.model('User');
+cosnt dotenv = require('dotenv');
+dotenv.config();
 
 // connecting to mongo
 mongoose.promise = global.Promise;
@@ -13,7 +15,8 @@ User.remove({}, (err) => {
 });
 
 let user = new User({
-    poloniex_key: 'askdjbasjkdsad',
+    poloniex_key: process.env.POLONIEX_KEY,
+    poloniex_secret: process.env.POLONIEX_SECRET,
     balances: [
         {'currency': 'ETH', 'amount': 8.64841},
         {'currency': 'BTC', 'amount': 0.54896}
