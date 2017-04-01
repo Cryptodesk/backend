@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const Tick = mongoose.model('Tick');
 
-exports.list_all_ticks = (req, res) => {
-    Tick.find({}, (err, ticks) => {
+exports.get_last_tick = (req, res) => {
+    Tick.findOne({'currencyPair': req.params.currencypair}).sort({timestamp: 'desc'}).limit(1).exec((err, tick) => {
         if(err) res.send(err);
-        else res.json(ticks);
+        else res.json(tick);
     });
 };
