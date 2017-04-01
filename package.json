@@ -1,0 +1,19 @@
+{
+  "name": "cryptodeskbackend",
+  "version": "1.0.0",
+  "description": "The backend for the cryptodesk product.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryptodesk/backend.git"
+  },
+  "author": "Gabriel Esteban <yufuven@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Cryptodesk/backend/issues"
+  },
+  "homepage": "https://github.com/Cryptodesk/backend#readme"
+}
