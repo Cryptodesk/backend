@@ -8,7 +8,7 @@ const Poloniex = require('poloniex-api-node');
 
 // connecting to mongo
 mongoose.promise = global.Promise;
-mongoose.connect('mongodb://localhost/cryptodesk');
+mongoose.connect(process.env.MONGODB_URI);
 
 User.remove({}, (err) => {
     if(err) console.log(err);
