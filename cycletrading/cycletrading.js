@@ -16,6 +16,7 @@ exports.start = function(socket, user_id, start, amount){
             if(!graph.hasVertex(v2)) graph.addVertex(v2);
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
+        socket.emit('info', {started:true});
         start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
 };
@@ -30,7 +31,8 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                 const next_hop = cycles[scores[0].position][1];
                 // make trade with the user_id
                 const new_amount = actual_amount*get_exchange(data, actual, next_hop);
-                console.log(actual+' -> '+next_hop+'    |    '+actual_amount+' -> '+new_amount);
+                // console.log(actual+' -> '+next_hop+'    |    '+actual_amount+' -> '+new_amount);
+                socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
                 visited[new_amount] += 1;
                 cycles = [];
                 scores = [];
@@ -39,6 +41,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
         });
 
     }else{
+        socket.emit('info', JSON.stringify({finished: true, initial: initial_amount, end: actual_amount}));
         console.log('Initial amount: '+initial_amount);
         console.log('End amount: '+actual_amount);
     }
