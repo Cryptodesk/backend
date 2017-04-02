@@ -10,7 +10,7 @@ const cycle = require('./cycletrading/socket');
 
 // connecting to mongo
 mongoose.promise = global.Promise;
-mongoose.connect(process.env.MONGOLAB_URI);
+mongoose.connect(process.env.MONGODB_URI);
 
 // starting api
 let app = express();
