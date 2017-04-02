@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGODB_URI);
 
 // starting api
 let app = express();
-let api_port = process.env.API_PORT || 3000;
+let api_port = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -23,7 +23,7 @@ routes(app);
 
 // starting socket.io for cycle trading
 let io = socket();
-let socket_port = process.env.SOCKET_PORT || 4000;
+let socket_port = process.env.PORT || 4000;
 
 //io.listen(socket_port);
 //cycle(io);
