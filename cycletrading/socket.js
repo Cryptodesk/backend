@@ -11,7 +11,7 @@ module.exports = function(io){
 
         socket.on('start', (data) => {
             console.log(user_id+ ' has started the cycle trading algorithm.')
-            cycletrading.start(socket, user_id, 'BTC', '0.005');
+            cycletrading.start(socket, user_id, 'BTC', '0.4');
         });
 
         socket.on('disconnect', (data) => {
