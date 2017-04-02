@@ -42,6 +42,8 @@ exports.remove_balance = (req, res) => {
 
 exports.create_movement = (req, res) => {
     // first update updates to + adds the movement and the second one updates from
+    console.log(req);
+    console.log(req.body);
     User.update({_id: req.params.userId,
                  'balances.currency': req.body.to},
                 {$push: {movements: req.body},
