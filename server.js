@@ -1,4 +1,5 @@
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 require('./models/tick');
 require('./models/user');
@@ -17,7 +18,8 @@ mongoose.connect(process.env.MONGODB_URI);
 
 // starting api
 let app = express();
-let api_port = process.env.PORT || 3000;
+let server = http.createServer(app);
+let port = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -25,17 +27,16 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
-app.listen(api_port);
+server.listen(port);
 routes(app);
 
 // starting socket.io for cycle trading
 let io = socket();
-let socket_port = process.env.PORT || 4000;
 
-//io.listen(socket_port);
-//cycle(io);
+io.listen(server);
+cycle(io);
 
 // starting to save ticks
 tickersaver.start();
 
-console.log('RESTful API server started on: ' + api_port+' and socket.io started on: '+socket_port);
+console.log('RESTful API server and socket.io started on: ' + port);

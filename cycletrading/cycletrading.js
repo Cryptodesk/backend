@@ -5,11 +5,9 @@ const Graph = require('./graph');
 let graph = new Graph();
 let cycles = [];
 let scores = [];
-let currencies;
 
 exports.start = function(socket, user_id, start, amount){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
-        currencies = curr;
         for(i in curr){
             let v1 = curr[i].split('_')[0];
             let v2 = curr[i].split('_')[1];
@@ -18,14 +16,33 @@ exports.start = function(socket, user_id, start, amount){
             if(!graph.hasVertex(v2)) graph.addVertex(v2);
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
-        find_cycles(start, start);
-        update_data();
-        assign_scores(amount, amount, () => {
-            //finished assigning scores
-            console.log(scores);
-        });
+        start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
 };
+
+function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
+    if(actual !== end || last === undefined){
+        find_cycles(actual, end);
+        update_data((err, data) => {
+            assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
+                //finished assigning scores
+                scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
+                const next_hop = cycles[scores[0].position][1];
+                // make trade with the user_id
+                const new_amount = actual_amount*get_exchange(data, actual, next_hop);
+                console.log(actual+' -> '+next_hop+'    |    '+actual_amount+' -> '+new_amount);
+                visited[new_amount] += 1;
+                cycles = [];
+                scores = [];
+                start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+            });
+        });
+
+    }else{
+        console.log('Initial amount: '+initial_amount);
+        console.log('End amount: '+actual_amount);
+    }
+}
 
 function _find_cycles(end, current, order){
     order.push(current);
@@ -58,47 +75,43 @@ function find_cycles(start, end) {
     }
 }
 
-function assign_scores(starting_amount, actual_amount, callback){
-    for(i in cycles){
-        const cycle = cycles[i];
-        ((pos) => {
-            calculate_ending_amount(actual_amount, cycle, 0.0025, (ending_amount) => {
-                if(ending_amount < starting_amount) scores.push({position: pos, score: -1});
-                else scores.push({position: pos, score: ending_amount-starting_amount});
-                if(scores.length == cycles.length) callback();
-            });
-        })(i);
+function assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, callback){
+    for(let i in cycles){
+        if(cycles.hasOwnProperty(i)){
+            const cycle = cycles[i];
+            const ending_amount = calculate_ending_amount(data, initial_amount, cycle, 0.0025);
+            if(ending_amount < initial_amount) scores.push({position: i, score: -1});
+            else {
+                let score = ending_amount-initial_amount;
+                if(last && last === cycle[1]) score = score*0.9;
+                if(visited[cycle[1]] > 2) score = score*0.3;
+                scores.push({position: i, score: score});
+            }
+        }
+    }
+    callback();
+}
+
+function get_exchange(data, v1, v2){
+    for(let c of data){
+        if(v1+'_'+v2 === c._id){
+            return c.last;
+        }else if(v2+'_'+v1 === c._id){
+            return 1/c.last;
+        }
     }
 }
 
-function get_exchange(v1, v2, callback){
-    if(currencies.indexOf(v1+'_'+v2) >= 0){
-        Tick.findOne({'currencyPair': v1+'_'+v2}).sort({timestamp: 'desc'}).limit(1).exec((err, tick) => {
-            if(err) callback(err, undefined);
-            else callback(undefined, tick.last);
-        });
-    }else{
-        Tick.findOne({'currencyPair': v2+'_'+v1}).sort({timestamp: 'desc'}).limit(1).exec((err, tick) => {
-            if(err) callback(err, undefined);
-            else callback(undefined, 1/tick.last);
-        });
-    }
-}
-
-function calculate_ending_amount(actual_amount, order, fee, callback){
+function calculate_ending_amount(data, actual_amount, order, fee){
     let last = undefined;
     let actual = actual_amount;
-    let count = 0;
     for(let c of order){
         if(last !== undefined){
-            get_exchange(last, c, (err, last) => {
-                actual = actual*last*(1-fee);
-                count += 1;
-                if(count == order.length) callback(actual);
-            });
+            actual = actual*get_exchange(data, last, c)*(1-fee);
         }
         last = c;
     }
+    return actual;
 }
 
 function update_data(callback){
