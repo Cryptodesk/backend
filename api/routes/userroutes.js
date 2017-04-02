@@ -6,6 +6,7 @@ module.exports = function(app){
     app.route('/user')
             .get(usercontroller.get_static_user);
 
+    // chat & desktop endpoints
     app.route('/user/:userId/movement')
             .get(usercontroller.list_user_movements);
 
