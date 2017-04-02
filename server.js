@@ -21,9 +21,10 @@ let api_port = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-// app.all('*', (req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', '*');
-// });
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.listen(api_port);
 routes(app);
 
