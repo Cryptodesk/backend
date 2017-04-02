@@ -19,6 +19,7 @@ exports.start = function(socket, user_id, start, amount){
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
         find_cycles(start, start);
+        update_data();
         assign_scores(amount, amount, () => {
             //finished assigning scores
             console.log(scores);
@@ -98,4 +99,13 @@ function calculate_ending_amount(actual_amount, order, fee, callback){
         }
         last = c;
     }
+}
+
+function update_data(callback){
+    Tick.aggregate({$group: {_id: '$currencyPair',
+                             timestamp: {$last: '$timestamp'},
+                             last: {$last: '$last'}}}).sort({timestamp: 'desc'}).exec((err, data) => {
+        if(err) callback(err, undefined);
+        else callback(err, data);
+    });
 }

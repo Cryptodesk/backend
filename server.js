@@ -7,6 +7,9 @@ const tickersaver = require('./tickersaver');
 const bodyParser = require('body-parser');
 const socket = require('socket.io');
 const cycle = require('./cycletrading/socket');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 // connecting to mongo
 mongoose.promise = global.Promise;
@@ -18,6 +21,9 @@ let api_port = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.all('*', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+});
 app.listen(api_port);
 routes(app);
 
