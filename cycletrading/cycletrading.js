@@ -142,7 +142,7 @@ function trade(data, from, to, amount, callback){
         if(currencies.indexOf(from+'_'+to) >= 0){ //from_to is the market
             // buy
             market = from+'_'+to;
-            poloniex.buy(market, rate, amount, true, false, false, (err, ret) => {
+            poloniex.buy(market, rate, amount, false, false, false, (err, ret) => {
                 console.log(ret);
                 if(err) callback(err, undefined);
                 else callback(undefined, amount*rate);
@@ -150,7 +150,7 @@ function trade(data, from, to, amount, callback){
         }else if(currencies.indexOf(to+'_'+from) >= 0){ // to_from is the market
             // sell
             market = to+'_'+from;
-            poloniex.sell(market, rate, amount, true, false, false, (err, ret) => {
+            poloniex.sell(market, rate, amount, false, false, false, (err, ret) => {
                 console.log(ret);
                 if(err) callback(err, undefined);
                 else callback(undefined, amount*rate);
