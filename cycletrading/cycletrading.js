@@ -13,11 +13,11 @@ let currencies;
 exports.start = function(socket, user_id, start, amount){
     User.findOne((err, user) => {
         if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
-        start_cycle_trading();
+        start_cycle_trading(socket, start, amount);
     });
 };
 
-function start_cycle_trading(){
+function start_cycle_trading(socket, user_id, start, amount){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
         currencies = curr;
         for(i in curr){
