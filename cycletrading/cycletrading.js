@@ -35,7 +35,6 @@ function start_cycle_trading(socket, user_id, start, amount){
 function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
     if(actual !== end || last === undefined){
         find_cycles(actual, end, (cycles) => {
-            console.log(cycles);
             update_data((err, data) => {
                 assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
                     const next_hop = cycles[scores[0].position][1];
@@ -60,7 +59,7 @@ function _find_cycles(cycles, end, current, order){
     let edges = graph.getVertexEdges(current);
     for(let node of edges){
         if(order.indexOf(node) === -1){
-            _find_cycles(end, node, order);
+            _find_cycles(cycles, end, node, order);
         }else if(node === end && order.length > 3){
             ((o, s) => {
                 let r = [];
