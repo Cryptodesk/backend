@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Tick = mongoose.model('Tick');
+const User = mongoose.model('User');
 const Graph = require('./graph');
 const Poloniex = require('poloniex-api-node');
 
