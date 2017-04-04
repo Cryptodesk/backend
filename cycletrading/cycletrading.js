@@ -36,7 +36,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     if(actual !== end || last === undefined){
         find_cycles(actual, end, (cycles) => {
             update_data((err, data) => {
-                assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
+                assign_scores(cycles, data, initial_amount, actual_amount, visited, last, actual, end, () => {
                     const next_hop = cycles[scores[0].position][1];
                     trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
                         // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
@@ -86,7 +86,7 @@ function find_cycles(start, end, callback) {
     callback(cycles);
 }
 
-function assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, callback){
+function assign_scores(cycles, data, initial_amount, actual_amount, visited, last, actual, end, callback){
     for(let i in cycles){
         if(cycles.hasOwnProperty(i)){
             const cycle = cycles[i];
