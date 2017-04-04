@@ -53,7 +53,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     // });
                     const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    visited.push(next_hop);
+                    visited.push(actual);
                     cycles = [];
                     scores = [];
                     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
@@ -86,14 +86,7 @@ function _find_cycles(cycles, end, current, order, visited){
 }
 function find_cycles(start, end, visited, callback) {
     let cycles = [];
-    let edges = graph.getVertexEdges(start);
-    if(edges !== undefined){
-        let order = [];
-        order.push(start);
-        for(let node of edges){
-            if(visited.indexOf(node) === -1) _find_cycles(cycles, end, node, order, visited);
-        }
-    }
+    _find_cycles(cycles, end, start, [], visited);
     callback(cycles);
 }
 
