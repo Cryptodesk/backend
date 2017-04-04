@@ -150,7 +150,7 @@ function trade(data, from, to, amount, callback){
         }else if(currencies.indexOf(to+'_'+from) >= 0){ // to_from is the market
             // sell
             market = to+'_'+from;
-            polonix.sell(market, rate, amount, true, true, false (err, ret) => {
+            poloniex.sell(market, rate, amount, true, true, false (err, ret) => {
                 console.log(ret);
                 if(err) callback(err, undefined);
                 else callback(undefined, amount*rate);
