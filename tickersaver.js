@@ -22,6 +22,7 @@ exports.start = () => {
             });
             tick.save((err, tick) => {
                 if(err) console.log('Error saving tick from poloniex');
+                console.log(err);
             });
         }
         session.subscribe('ticker', tickerEvent);
@@ -47,6 +48,7 @@ exports.start = () => {
             });
             tick.save((err, tick) => {
                 if(err) console.log('Error saving tick from gdax');
+                console.log(err);
             });
         }
     });

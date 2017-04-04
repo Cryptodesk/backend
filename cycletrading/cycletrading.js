@@ -58,8 +58,6 @@ function cycle(socket, user_id, visited, last, actual, end, initial_amount, actu
         });
     }else{
         socket.emit('info', JSON.stringify({finished: true, initial: initial_amount, end: actual_amount}));
-        console.log(initial_amount);
-        console.log(actual_amount);
     }
 }
 
