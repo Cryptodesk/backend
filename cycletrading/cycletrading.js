@@ -9,6 +9,8 @@ let graph = new Graph();
 let scores = [];
 let currencies;
 
+const MIN_CYCLE_LENGHT = 3;
+
 exports.start = function(socket, user_id, start, amount){
     User.findOne((err, user) => {
         if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
@@ -48,7 +50,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     // });
                     console.log(cycles);
                     console.log(scores);
-                    const new_amount = actual_amount*get_exchange(data, actual, next_hop);
+                    const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
                     visited[new_amount] += 1;
                     cycles = [];
@@ -75,7 +77,7 @@ function _find_cycles(cycles, end, current, order){
                     r.push(n);
                 }
                 r.push(s);
-                cycles.push(r);
+                if(r.length >= MIN_CYCLE_LENGHT) cycles.push(r);
             })(order, end);
         }
     }
