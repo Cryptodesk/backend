@@ -71,7 +71,7 @@ function _find_cycles(cycles, end, current, order, visited){
     for(let node of edges){
         if(order.indexOf(node) === -1 && visited.indexOf(node) === -1){
             _find_cycles(cycles, end, node, order, visited);
-        }else if(node === end && order.length > MIN_CYCLE_LENGHT){
+        }else if(node === end && order.length+visited.length > MIN_CYCLE_LENGHT){
             ((o, s) => {
                 let r = [];
                 for(let n of o){
