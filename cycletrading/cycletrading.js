@@ -39,7 +39,8 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
         update_data((err, data) => {
             assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
                 //finished assigning scores
-                scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
+                console.log(cycles);
+                console.log(scores);
                 const next_hop = cycles[scores[0].position][1];
                 trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
                     // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
@@ -102,6 +103,8 @@ function assign_scores(data, initial_amount, actual_amount, visited, last, actua
             }
         }
     }
+    scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
+    console.log(scores);
     callback();
 }
 
