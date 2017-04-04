@@ -6,7 +6,6 @@ const Poloniex = require('poloniex-api-node');
 
 let poloniex = undefined;
 let graph = new Graph();
-let cycles = [];
 let scores = [];
 let currencies;
 
@@ -20,7 +19,6 @@ exports.start = function(socket, user_id, start, amount){
 function start_cycle_trading(socket, user_id, start, amount){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
         currencies = curr;
-        console.log(currencies);
         for(i in curr){
             let v1 = curr[i].split('_')[0];
             let v2 = curr[i].split('_')[1];
@@ -30,37 +28,35 @@ function start_cycle_trading(socket, user_id, start, amount){
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
         socket.emit('info', {started:true});
+        graph.print();
         start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
 }
 
 function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
     if(actual !== end || last === undefined){
-        find_cycles(actual, end);
-        update_data((err, data) => {
-            console.log(data);
-            assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
-                //finished assigning scores
-                console.log(cycles);
-                console.log(scores);
-                const next_hop = cycles[scores[0].position][1];
-                trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
-                    // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
-                    socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    visited[new_amount] += 1;
-                    cycles = [];
-                    scores = [];
-                    start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+        find_cycles(actual, end, (cycles) => {
+            console.log(cycles);
+            update_data((err, data) => {
+                assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
+                    const next_hop = cycles[scores[0].position][1];
+                    trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
+                        // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
+                        socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
+                        visited[new_amount] += 1;
+                        cycles = [];
+                        scores = [];
+                        start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                    });
                 });
             });
         });
-
     }else{
         socket.emit('info', JSON.stringify({finished: true, initial: initial_amount, end: actual_amount}));
     }
 }
 
-function _find_cycles(end, current, order){
+function _find_cycles(cycles, end, current, order){
     order.push(current);
     let edges = graph.getVertexEdges(current);
     for(let node of edges){
@@ -79,16 +75,17 @@ function _find_cycles(end, current, order){
     }
     order.pop();
 }
-function find_cycles(start, end) {
-    cycles = [];
+function find_cycles(start, end, callback) {
+    let cycles = [];
     let edges = graph.getVertexEdges(start);
     if(edges !== undefined){
         let order = [];
         order.push(start);
         for(let node of edges){
-            _find_cycles(end, node, order);
+            _find_cycles(cycles, end, node, order);
         }
     }
+    callback(cycles);
 }
 
 function assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, callback){
@@ -106,7 +103,6 @@ function assign_scores(data, initial_amount, actual_amount, visited, last, actua
         }
     }
     scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
-    console.log(scores);
     callback();
 }
 
