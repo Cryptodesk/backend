@@ -10,13 +10,6 @@ let cycles = [];
 let scores = [];
 let currencies;
 
-exports.start = function(socket, user_id, start, amount){
-    User.findOne((err, user) => {
-        if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
-        start();
-    });
-};
-
 function start(){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
         currencies = curr;
@@ -159,3 +152,10 @@ function trade(data, from, to, amount, callback){
         }
     }
 }
+
+exports.start = function(socket, user_id, start, amount){
+    User.findOne((err, user) => {
+        if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
+        start();
+    });
+};
