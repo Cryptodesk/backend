@@ -30,11 +30,11 @@ function start_cycle_trading(socket, user_id, start, amount){
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
         socket.emit('info', {started:true});
-        start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
+        cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
 }
 
-function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
+function cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
     if(actual !== end || last === undefined){
         find_cycles(actual, end, visited, (cycles) => {
             update_data((err, data) => {
@@ -56,7 +56,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     visited.push(actual);
                     cycles = [];
                     scores = [];
-                    start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                    cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
                 });
             });
         });
