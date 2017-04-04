@@ -36,9 +36,9 @@ function start_cycle_trading(socket, user_id, start, amount){
 
 function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
     if(actual !== end || last === undefined){
-        find_cycles(actual, end, (cycles) => {
+        find_cycles(actual, end, visited, (cycles) => {
             update_data((err, data) => {
-                assign_scores(cycles, data, initial_amount, actual_amount, visited, last, actual, end, () => {
+                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, () => {
                     const next_hop = cycles[scores[0].position][1];
                     // trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
                     //     // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
@@ -52,7 +52,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     console.log(scores);
                     const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    visited[new_amount] += 1;
+                    visisted.push(actual);
                     cycles = [];
                     scores = [];
                     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
@@ -64,39 +64,39 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     }
 }
 
-function _find_cycles(cycles, end, current, order){
+function _find_cycles(cycles, end, current, order, visited){
     order.push(current);
     let edges = graph.getVertexEdges(current);
     for(let node of edges){
-        if(order.indexOf(node) === -1){
+        if(order.indexOf(node) === -1 && visited.indexOf(node) === -1){
             _find_cycles(cycles, end, node, order);
-        }else if(node === end && order.length > 3){
+        }else if(node === end && order.length > MIN_CYCLE_LENGHT){
             ((o, s) => {
                 let r = [];
                 for(let n of o){
                     r.push(n);
                 }
                 r.push(s);
-                if(r.length >= MIN_CYCLE_LENGHT) cycles.push(r);
+                cycles.push(r);
             })(order, end);
         }
     }
     order.pop();
 }
-function find_cycles(start, end, callback) {
+function find_cycles(start, end, visited, callback) {
     let cycles = [];
     let edges = graph.getVertexEdges(start);
     if(edges !== undefined){
         let order = [];
         order.push(start);
         for(let node of edges){
-            _find_cycles(cycles, end, node, order);
+            _find_cycles(cycles, end, node, order, visited);
         }
     }
     callback(cycles);
 }
 
-function assign_scores(cycles, data, initial_amount, actual_amount, visited, last, actual, end, callback){
+function assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, callback){
     for(let i in cycles){
         if(cycles.hasOwnProperty(i)){
             const cycle = cycles[i];
@@ -105,7 +105,6 @@ function assign_scores(cycles, data, initial_amount, actual_amount, visited, las
             else {
                 let score = ending_amount-initial_amount;
                 if(last && last === cycle[1]) score = score*0.9;
-                if(visited[cycle[1]] > 2) score = score*0.3;
                 scores.push({position: i, score: score});
             }
         }
