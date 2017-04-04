@@ -46,13 +46,13 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     //     scores = [];
                     //     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
                     // });
-
+                    console.log(cycles);
+                    console.log(scores);
                     const new_amount = actual_amount*get_exchange(data, actual, next_hop);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
                     visited[new_amount] += 1;
                     cycles = [];
                     scores = [];
-                    console.log(scores);
                     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
                 });
             });
