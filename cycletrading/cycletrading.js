@@ -84,14 +84,13 @@ function _find_cycles(cycles, end, current, order, visited){
     order.pop();
 }
 function find_cycles(start, end, visited, callback) {
-    console.log(visited);
     let cycles = [];
     let edges = graph.getVertexEdges(start);
     if(edges !== undefined){
         let order = [];
         order.push(start);
         for(let node of edges){
-            _find_cycles(cycles, end, node, order, visited);
+            if(visited.indexOf(node) === -1) _find_cycles(cycles, end, node, order, visited);
         }
     }
     callback(cycles);
