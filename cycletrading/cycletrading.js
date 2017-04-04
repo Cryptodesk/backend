@@ -38,7 +38,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     if(actual !== end || last === undefined){
         find_cycles(actual, end, visited, (cycles) => {
             update_data((err, data) => {
-                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, () =>
+                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, ()  {
                     console.log(visited);
                     console.log(cycles.length);
                     console.log(scores.length);
