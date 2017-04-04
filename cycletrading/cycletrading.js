@@ -20,6 +20,7 @@ exports.start = function(socket, user_id, start, amount){
 function start_cycle_trading(socket, user_id, start, amount){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
         currencies = curr;
+        console.log(currencies);
         for(i in curr){
             let v1 = curr[i].split('_')[0];
             let v2 = curr[i].split('_')[1];
@@ -37,6 +38,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     if(actual !== end || last === undefined){
         find_cycles(actual, end);
         update_data((err, data) => {
+            console.log(data);
             assign_scores(data, initial_amount, actual_amount, visited, last, actual, end, () => {
                 //finished assigning scores
                 console.log(cycles);
