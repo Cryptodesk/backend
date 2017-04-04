@@ -1,13 +1,24 @@
 const mongoose = require('mongoose');
 const Tick = mongoose.model('Tick');
 const Graph = require('./graph');
+const Poloniex = require('poloniex-api-node');
 
+let poloniex = undefined;
 let graph = new Graph();
 let cycles = [];
 let scores = [];
+let currencies;
 
 exports.start = function(socket, user_id, start, amount){
+    User.findOne((err, user) => {
+        if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
+        start();
+    });
+};
+
+function start(){
     Tick.find().distinct('currencyPair').exec((err, curr) => {
+        currencies = curr;
         for(i in curr){
             let v1 = curr[i].split('_')[0];
             let v2 = curr[i].split('_')[1];
@@ -19,7 +30,7 @@ exports.start = function(socket, user_id, start, amount){
         socket.emit('info', {started:true});
         start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
-};
+}
 
 function start_cycle(socket, user_id, visited, last, actual, end, initial_amount, actual_amount){
     if(actual !== end || last === undefined){
@@ -29,21 +40,19 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                 //finished assigning scores
                 scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
                 const next_hop = cycles[scores[0].position][1];
-                // make trade with the user_id
-                const new_amount = actual_amount*get_exchange(data, actual, next_hop);
-                // console.log(actual+' -> '+next_hop+'    |    '+actual_amount+' -> '+new_amount);
-                socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                visited[new_amount] += 1;
-                cycles = [];
-                scores = [];
-                start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
+                    // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
+                    socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
+                    visited[new_amount] += 1;
+                    cycles = [];
+                    scores = [];
+                    start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                });
             });
         });
 
     }else{
         socket.emit('info', JSON.stringify({finished: true, initial: initial_amount, end: actual_amount}));
-        console.log('Initial amount: '+initial_amount);
-        console.log('End amount: '+actual_amount);
     }
 }
 
@@ -124,4 +133,28 @@ function update_data(callback){
         if(err) callback(err, undefined);
         else callback(err, data);
     });
+}
+
+function trade(data, from, to, amount, callback){
+    let market;
+    let rate = get_exchange(data, from, to);
+    if(poloniex){
+        if(currencies.indexOf(from+'_'+to) >= 0){ //from_to is the market
+            // buy
+            market = from+'_'+to;
+            poloniex.buy(market, rate, amount, true, true, false, (err, ret) => {
+                console.log(ret);
+                if(err) callback(err, undefined);
+                else callback(undefined, amount*rate);
+            });
+        }else if(currencies.indexOf(to+'_'+from) >= 0){ // to_from is the market
+            // sell
+            market = to+'_'+from;
+            polonix.sell(market, rate, amount, true, true, false (err, ret) => {
+                console.log(ret);
+                if(err) callback(err, undefined);
+                else callback(undefined, amount*rate);
+            });
+        }
+    }
 }
