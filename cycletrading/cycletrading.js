@@ -38,10 +38,9 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     if(actual !== end || last === undefined){
         find_cycles(actual, end, visited, (cycles) => {
             update_data((err, data) => {
-                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, () => {
-                    console.log(visited);
-                    console.log(cycles.length);
-                    console.log(scores.length);
+                assign_scores(cycles, data, initial_amount, actual_amount, actual, end, () => {
+                    console.log(cycles);
+                    console.log(scores);
                     const next_hop = cycles[scores[0].position][1];
                     // trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
                     //     // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
@@ -90,17 +89,13 @@ function find_cycles(start, end, visited, callback) {
     callback(cycles);
 }
 
-function assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, callback){
+function assign_scores(cycles, data, initial_amount, actual_amount, actual, end, callback){
     for(let i in cycles){
         if(cycles.hasOwnProperty(i)){
             const cycle = cycles[i];
             const ending_amount = calculate_ending_amount(data, initial_amount, cycle, 0.0025);
-            if(ending_amount < initial_amount) scores.push({position: i, score: -1});
-            else {
-                let score = ending_amount-initial_amount;
-                if(last && last === cycle[1]) score = score*0.9;
-                scores.push({position: i, score: score});
-            }
+            let score = ending_amount-initial_amount;
+            scores.push({position: i, score: score});
         }
     }
     scores.sort((a, b) => {return a.score < b.score ? 1 : (a.score > b.score ? -1 : 0)});
