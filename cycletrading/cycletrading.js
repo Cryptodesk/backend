@@ -53,7 +53,7 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     // });
                     const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    visited.push(actual);
+                    visited.push(next_hop);
                     cycles = [];
                     scores = [];
                     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
