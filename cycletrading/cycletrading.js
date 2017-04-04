@@ -38,7 +38,10 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
     if(actual !== end || last === undefined){
         find_cycles(actual, end, visited, (cycles) => {
             update_data((err, data) => {
-                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, () => {
+                assign_scores(cycles, data, initial_amount, actual_amount, last, actual, end, () =>
+                    console.log(visited);
+                    console.log(cycles.length);
+                    console.log(scores.length);
                     const next_hop = cycles[scores[0].position][1];
                     // trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
                     //     // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
@@ -48,8 +51,6 @@ function start_cycle(socket, user_id, visited, last, actual, end, initial_amount
                     //     scores = [];
                     //     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
                     // });
-                    console.log(cycles);
-                    console.log(scores);
                     const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
                     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
                     visited.push(actual);
