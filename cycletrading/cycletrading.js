@@ -95,6 +95,8 @@ function assign_scores(cycles, data, initial_amount, actual_amount, actual, end,
         if(cycles.hasOwnProperty(i)){
             const cycle = cycles[i];
             const ending_amount = calculate_ending_amount(data, initial_amount, cycle, 0.0025);
+            console.log(ending_amount);
+            console.log(initial_amount);
             let score = ending_amount-initial_amount;
             scores.push({position: i, score: score});
         }
