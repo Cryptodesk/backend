@@ -12,7 +12,7 @@ let currencies;
 exports.start = function(socket, user_id, start, amount){
     User.findOne((err, user) => {
         if(!err) poloniex = new Poloniex(user.poloniex_key, user.poloniex_secret);
-        start_cycle_trading(socket, start, amount);
+        start_cycle_trading(socket, user_id, start, amount);
     });
 };
 
@@ -28,7 +28,6 @@ function start_cycle_trading(socket, user_id, start, amount){
             if(!graph.hasEdge(v1, v2)) graph.addEdge(v1, v2);
         }
         socket.emit('info', {started:true});
-        graph.print();
         start_cycle(socket, user_id, [], undefined, start, start, amount, amount);
     });
 }
