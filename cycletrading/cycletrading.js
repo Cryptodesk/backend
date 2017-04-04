@@ -40,20 +40,19 @@ function cycle(socket, user_id, visited, last, actual, end, initial_amount, actu
             update_data((err, data) => {
                 assign_scores(cycles, data, initial_amount, actual_amount, actual, end, () => {
                     const next_hop = cycles[scores[0].position][1];
-                    // trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
-                    //     // const new_amount = actual_amount*get_exchange(data, actual, next_hop);
-                    //     socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    //     visited[new_amount] += 1;
-                    //     cycles = [];
-                    //     scores = [];
-                    //     start_cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
-                    // });
-                    const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
-                    socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
-                    visited.push(actual);
-                    cycles = [];
-                    scores = [];
-                    cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                    trade(data, actual, next_hop, actual_amount, (err, new_amount) => {
+                        socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
+                        visited.push(actual);
+                        cycles = [];
+                        scores = [];
+                        cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
+                    });
+                    // const new_amount = actual_amount*get_exchange(data, actual, next_hop)*(1-0.0025);
+                    // socket.emit('movement', JSON.stringify({from: actual, to: next_hop, actual_amount: actual_amount, new_amount:new_amount}));
+                    // visited.push(actual);
+                    // cycles = [];
+                    // scores = [];
+                    // cycle(socket, user_id, visited, actual, next_hop, end, initial_amount, new_amount);
                 });
             });
         });
