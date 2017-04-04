@@ -107,9 +107,9 @@ function assign_scores(cycles, data, initial_amount, actual_amount, visited, las
 function get_exchange(data, v1, v2){
     for(let c of data){
         if(v1+'_'+v2 === c._id){
-            return c.last;
-        }else if(v2+'_'+v1 === c._id){
             return 1/c.last;
+        }else if(v2+'_'+v1 === c._id){
+            return c.last;
         }
     }
 }
